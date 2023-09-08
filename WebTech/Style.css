@@ -1,0 +1,77 @@
+﻿body {
+    margin: 0;
+    padding: 0;
+    width: 1450px;
+    margin: 0 auto;
+}
+
+.bon {
+    font-size: 38px;
+    font-family: 'Rozha One', serif;
+    color: #0b03fc;
+}
+
+.heading {
+    color: #0b03fc;
+    font-size: 40px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    margin-left: 45px;
+    font-family: 'Rozha One', serif;
+}
+
+.horizontal-line {
+    width: 100%;
+    border-bottom: 1px solid #000;
+}
+
+.menu {
+    font-size: 15px;
+    margin-left: 45px;
+    margin-top: 10px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+p {
+    margin-right: 15px;
+    float: left;
+}
+
+.text {
+    padding: 3%;
+    font-size: 24px;
+    color: #0b03fc;
+    font-weight: bold;
+    font-family: 'Rozha One', serif;
+}
+
+.parallax {
+    min-height: 570px;
+    margin-left: 45px;
+    margin-right: 45px;
+    margin-top: 90px;
+    background-image: url("img/Cutlery.png");
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: 1420px 900px;
+}
+
+.button {
+    width: 100px;
+    height: 50px;
+    background-color: #ffffff;
+    text-align: center;
+    line-height: 50px;
+    margin-left: 45px;
+    margin-top: 15px;
+}
+
+.images {
+    margin-left: 45px;
+    margin-right: 35px;
+    margin-top: 5px;
+}
+
+img {
+    width: 665px;
+}
