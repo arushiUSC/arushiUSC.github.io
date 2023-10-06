@@ -1,0 +1,409 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Search Form</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: center;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 38%;
+            margin: 0 auto;
+        }
+
+        .content-container {
+            float: left;
+        }
+
+        .item-box {
+            border: 1px solid black;
+            padding: 10px;
+            margin: 10px;
+            max-width: 750px;
+            margin-left: 325px;
+            max-height: 200px;
+            font-size: 15px;
+            overflow: hidden;
+            border-radius: 10px;
+            background-color: #f0f0f0;
+        }
+
+            .item-box:hover {
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            }
+
+            .item-box img.item-image {
+                max-width: 100%;
+                max-height: 100%;
+                height: auto;
+                float: left;
+                padding-right: 20px;
+                padding-top: 20px;
+                padding-left: 20px;
+                padding-bottom: 20px;
+                transition: transform 0.3s;
+            }
+
+                .item-box img.item-image:hover {
+                    transform: scale(1.5);
+                }
+    </style>
+</head>
+<body>
+    <form id="searchForm">
+        <img src="eBayLogo.png" style="margin-left:400px;" href="https://www.ebay.com/">
+        <table>
+            <tr>
+                <td>
+                    <b>Keywords<span style="color: red;">* </span> :</b>
+                    <input type="text" id="keywords" name="keywords" required>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b style="padding:5px;">Price Range:</b>
+                    <span style="padding:5px;">From:<input type="number" id="minPrice" name="minPrice" step="0.1" style="width:60px;"></span>
+                    <span style="padding:5px;">to:<input type="number" id="maxPrice" name="maxPrice" step="0.1" style="width:60px;"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>Condition:</b>
+
+                    <label><input type="checkbox" name="condition" value="1000"> New</label>
+                    <label><input type="checkbox" name="condition" value="3000"> Used</label>
+                    <label><input type="checkbox" name="condition" value="4000"> Very Good</label>
+                    <label><input type="checkbox" name="condition" value="5000"> Good</label>
+                    <label><input type="checkbox" name="condition" value="6000"> Acceptable</label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>Seller:</b>
+                    <input type="checkbox" name="seller" value="accepts_returns"> Return Accepted
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>Shipping:</b>
+                    <label><input type="checkbox" name="shipping" id="shipping" value="free_shipping"> Free</label>
+                    <label><input type="checkbox" name="shipping1" value="expedited_shipping"> Expedited</label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>Sort By:</b>
+                    <select id="sortBy" name="sortBy">
+                        <option value="BestMatch">Best Match</option>
+                        <option value="CurrentPriceHighest">Price: highest first</option>
+                        <option value="PricePlusShippingHighest">Price + Shipping: highest first</option>
+                        <option value="PricePlusShippingLowest">Price + Shipping: lowest first</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="reset" value="CLEAR">
+                    <button type="submit">SEARCH</button>
+                </td>
+            </tr>
+        </table>
+        <br>
+    </form>
+
+    <div id="totalItems" style="margin-left:550px;font-size:22px;font-weight:bold;"></div>
+    <hr />
+    <br />
+
+    <div id="results"></div>
+    <div id="moreResults"></div>
+    <div id="lessResults"></div>
+
+
+    <script>function createItemBox(item) {
+            var itemBox = document.createElement('div');
+            itemBox.classList.add('item-box');
+
+
+            var image = document.createElement('img');
+            image.classList.add('item-image');
+            image.src = item.galleryURL[0];
+            itemBox.appendChild(image);
+
+            var contentContainer = document.createElement('div');
+            contentContainer.classList.add('content-container');
+            itemBox.appendChild(contentContainer);
+
+            var title = document.createElement('p');
+            title.textContent = item.title[0];
+            title.style.fontWeight = "bold";
+            contentContainer.appendChild(title);
+
+            var br1 = document.createElement('br');
+            contentContainer.appendChild(br1);
+
+            var category = document.createElement('p');
+            category.textContent = 'Category: ';
+            var categoryName = document.createElement('span');
+            categoryName.textContent = item.primaryCategory[0].categoryName[0];
+            categoryName.style.fontStyle = "italic";
+            category.appendChild(categoryName);
+            category.style.display = "inline-block";
+            contentContainer.appendChild(category);
+
+            var imageRedirect = document.createElement('img');
+            imageRedirect.src = "redirect.png";
+            imageRedirect.style.display = "inline-block";
+            contentContainer.appendChild(imageRedirect);
+
+            var br = document.createElement('br');
+            contentContainer.appendChild(br);
+
+            var condition = document.createElement('p');
+            condition.textContent = 'Condition: ' + item.condition[0].conditionDisplayName[0];
+            condition.style.display = "inline-block";
+            contentContainer.appendChild(condition);
+
+
+            var TopRated = item.topRatedListing;
+            if (TopRated == "true") {
+                var imageTopRated = document.createElement('img');
+                imageTopRated.src = "topRatedImage.png";
+                imageTopRated.style.display = "inline-block";
+                contentContainer.appendChild(imageTopRated);
+            }
+
+            var price = document.createElement('p');
+            price.textContent = 'Price: $' + item.sellingStatus[0].currentPrice[0].__value__;
+            price.style.fontWeight = "bold";
+            contentContainer.appendChild(price);
+
+            itemBox.dataset.itemID = item.itemId[0];
+
+            return itemBox;
+        }
+
+
+        document.getElementById('searchForm').addEventListener('submit', function (event) {
+
+            event.preventDefault();
+
+            var minPriceValidator = parseFloat(document.getElementById('minPrice').value);
+            var maxPriceValidator = parseFloat(document.getElementById('maxPrice').value);
+
+            if (minPriceValidator > maxPriceValidator) {
+                alert('Oops! Lower price limit cannot be greater than upper price limit! Please try again.');
+                event.preventDefault();
+            }
+
+            if (minPriceValidator < 0 || maxPriceValidator < 0) {
+                alert('Price range values cannot be negative! Please try a value greater than or equal to 0.0');
+                event.preventDefault();
+            }
+
+            var xhr = new XMLHttpRequest();
+            var keywords = document.getElementById('keywords').value;
+            var minPrice = document.getElementById('minPrice').value;
+            var maxPrice = document.getElementById('maxPrice').value;
+            var shipping = document.getElementById('shipping').checked;
+            var sortBy = document.getElementById('sortBy').value;
+            var seller = document.getElementsByName('seller')[0].checked;
+            var condition = Array.from(document.getElementsByName('condition'))
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => checkbox.value);
+
+            xhr.open('GET', '/fetchAlldata?'
+                + 'keywords=' + encodeURIComponent(keywords)
+                + '&minPrice=' + encodeURIComponent(minPrice)
+                + '&maxPrice=' + encodeURIComponent(maxPrice)
+                + '&shipping=' + encodeURIComponent(shipping)
+                + '&seller=' + encodeURIComponent(seller)
+                + '&sortBy=' + encodeURIComponent(sortBy)
+                + '&condition=' + encodeURIComponent(condition.join(',')));
+
+            xhr.onload = function () {
+                if (xhr.status >= 200 && xhr.status < 400) {
+                    var items = JSON.parse(xhr.responseText).findItemsAdvancedResponse[0].searchResult[0].item;
+                    var totalItemsCount = JSON.parse(xhr.responseText).findItemsAdvancedResponse[0].paginationOutput[0].totalEntries;
+                    var totalItems = document.getElementById('totalItems');
+
+                    if (totalItemsCount == 0) {
+                        totalItems.innerHTML = 'No Results Found';
+                    }
+                    if (totalItemsCount > 0) {
+                        totalItems.innerHTML = totalItemsCount + ' Results found for <i>' + keywords + '</i>';
+                    }
+
+                    var resultsDiv = document.getElementById('results');
+                    resultsDiv.innerHTML = '';
+                    var moreResultsDiv = document.getElementById('moreResults');
+                    moreResultsDiv.innerHTML = '';
+                    var lessResults = document.getElementById('lessResults');
+                    lessResults.innerHTML = '';
+                    var counter = 0;
+                    var itemsLength = items.length;
+
+
+                    var counter = 0; // Initialize a counter variable
+                    var itemsLength = items.length;
+
+                    items.forEach(function (item) {
+                        if (counter < 3) {
+                            var itemBox = createItemBox(item);
+                            resultsDiv.appendChild(itemBox);
+                            counter++;
+                        }
+                    });
+                    if (itemsLength >= 3) {
+                        showMoreButton = document.createElement('button');
+                        showMoreButton.textContent = 'Show More';
+                        resultsDiv.appendChild(showMoreButton);
+
+                    }
+                    lessResultsButton = document.createElement('button');
+                    lessResultsButton.textContent = 'Show Less';
+                    lessResults.appendChild(lessResultsButton);
+                    lessResults.style.display = 'none';
+
+
+                    showMoreButton.addEventListener('click', function () {
+                        var nextCounter = 0;
+
+
+                        lessResults.style.display = 'block';
+
+
+                        items = items.slice(3);
+
+                        items.forEach(function (item) {
+                            if (nextCounter < 7) {
+                                var itemBox = createItemBox(item);
+                                moreResultsDiv.appendChild(itemBox);
+                                nextCounter++;
+                            }
+                        });
+                        if (items.length <= 10) { // Assuming you want to show up to 10 items in total
+                            showMoreButton.style.display = 'none';
+                        }
+
+                        lessResultsButton.addEventListener('click', function () {
+                            lessResults.style.display = 'none';
+                            moreResults.style.display = 'none';
+                            showMoreButton.style.display = 'block';
+
+                        });
+
+                        showMoreButton.addEventListener('click', function () {
+                            moreResults.style.display = 'block';
+                            lessResults.style.display = 'block';
+
+                            showMoreButton.style.display = 'none';
+
+                        });
+                    });
+
+
+                } else {
+                    document.getElementById('results').innerHTML = 'Error fetching data.';
+                }
+
+                var resultItems = document.getElementsByClassName('item-box');
+                for (var i = 0; i < resultItems.length; i++) {
+                    resultItems[i].addEventListener('click', function (event) {
+                        event.preventDefault();
+                        var itemID = this.dataset.itemID; // Get the ItemID from the clicked result
+                        var singleItemXhr = new XMLHttpRequest();
+
+
+                        singleItemXhr.open('GET', '/getSingleItemID?ItemID=' + encodeURIComponent(itemID), true);
+
+                        singleItemXhr.onload = function () {
+                            if (singleItemXhr.status >= 200 && singleItemXhr.status < 400) {
+                                var item = JSON.parse(singleItemXhr.responseText).Item;
+
+                                var tableHTML = '<table border="1">';
+
+                                function addItemRow(key, value) {
+                                    tableHTML += '<tr><td>' + key + '</td><td>' + value + '</td></tr>';
+                                }
+
+                                // Photo
+                                if (item.PictureURL) {
+                                    if (item.PictureURL == "https://thumbs1.ebaystatic.com/pict/04040_0.jpg") {
+                                        addItemRow('<b>Photo</b>', item.PictureURL.map(url => '<img src="ebay_default.jpg" alt="Item Photo" height="100">').join('<br>'));
+
+                                    }
+                                    else {
+                                        addItemRow('<b>Photo</b>', item.PictureURL.map(url => '<img src="' + url + '" alt="Item Photo" height="100">').join('<br>'));
+                                    }
+                                }
+
+                                // eBay Link
+                                if (item.ViewItemURLForNaturalSearch) {
+                                    addItemRow('<b>eBay Link</b>', '<a href="' + item.ViewItemURLForNaturalSearch + '" target="_blank">View on eBay</a>');
+                                }
+
+                                // Title
+                                addItemRow('<b>Title</b>', item.Title);
+
+                                // SubTitle (if available)
+                                if (item.Subtitle) {
+                                    addItemRow('<b>SubTitle</b>', item.Subtitle);
+                                }
+
+                                // Price
+                                if (item.CurrentPrice && item.CurrentPrice.Value) {
+                                    addItemRow('<b>Price</b>', '$' + item.CurrentPrice.Value);
+                                }
+
+                                // Location
+                                if (item.Location && item.PostalCode) {
+                                    addItemRow('<b>Location</b>', item.Location + ', ' + item.PostalCode);
+                                }
+
+                                // Seller
+                                if (item.Seller && item.Seller.UserID) {
+                                    addItemRow('<b>Seller</b>', item.Seller.UserID);
+                                }
+
+                                // Return Policy (US)
+                                if (item.ReturnPolicy && item.ReturnPolicy.Refund) {
+                                    addItemRow('<b>Return Policy (US)</b>', item.ReturnPolicy.Refund);
+                                }
+
+                                // ItemSpecifics (Name)
+                                if (item.ItemSpecifics && item.ItemSpecifics.NameValueList) {
+                                    item.ItemSpecifics.NameValueList.forEach(function (spec) {
+                                        addItemRow(spec.Name, spec.Value.join(', '));
+                                    });
+                                }
+
+                                tableHTML += '</table>';
+                                totalEntriesShow.style.display = 'none';
+
+                                lessResults.style.display = 'none';
+                                moreResults.style.display = 'none';
+                                document.getElementById('results').innerHTML = tableHTML;
+                            } else {
+                                document.getElementById('results').innerHTML = 'Error fetching data.';
+                            }
+                        };
+
+
+                        singleItemXhr.send();
+                    });
+                }
+            };
+
+
+            xhr.send();
+        });</script>
+
+
+</body>
+</html>
