@@ -1,0 +1,667 @@
+<html>
+  <head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+  
+    <title>EBay</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <style>
+      
+    
+        .dots {
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          cursor: pointer;
+          max-width: 150px; 
+          overflow: hidden;
+        }
+        .selectRowHighlight {
+          background-color: white; 
+        }  
+        .tooltip-container {
+          display: inline-block;
+          position: relative;
+        }
+
+        .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+          background-color: #000; 
+          color: #fff; 
+      }
+      .active {
+          background-color: #000; 
+          color: #fff; 
+      }
+      .add-border {
+        border: 12px solid #000; 
+      }
+      
+      .round-progress {
+        width: 1px; 
+        height: 1px; 
+      }
+  </style>
+
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+
+  </head>
+
+
+
+  <body>
+    
+    
+    <div class="container d-flex justify-content-center align-items-center bg-dark vh-80 text-light col-md-9">
+      <div class="row">
+
+        <div class="col-md-10">
+
+          <form (ngSubmit)="loadResults()" #searchForm="ngForm" name="searchForm" class="bg-dark text-light p-4 rounded bg-dark">
+
+
+            <h2>Product Search</h2>
+
+
+            <table style="width: 150%;">
+
+
+              <tr>
+                <td>
+                  
+                  <label for="keyword">Keyword<span style="color: red;font-size: 1.2em;">*</span></label></td>
+                <td>
+
+
+                  <div class="form-group" [ngClass]="{'has-error': !isKeywordsValid}">
+                    <input type="text" class="form-control" id="keyword" name="keyword" placeholder="Enter Product Name (eg. iPhone 8)" required [(ngModel)]="searchQuery.keyword" style="width:60%;">
+                  </div>
+
+
+                </td>
+                
+              </tr><br>
+
+
+              <tr>
+                <td>
+                  
+                  <label for="category">Category</label></td>
+                <td><div class="form-group">
+
+                  
+                  <select class="form-control" [(ngModel)]="searchQuery.category" name="category" style="width: 25%;">
+                    <option value="58058">All categories</option>
+                    <option value="550">Art</option>
+                    <option value="2984">Baby</option>
+                    <option value="267">Books</option>
+                    <option value="11450">Clothing, Shoes & Accessories</option>
+                    <option value="58058">Computers/Tablets & Networking</option>
+                    <option value="26395">Health & Beauty</option>
+                    <option value="11233">Music</option>
+                    <option value="1249">Video Games & Consoles</option>
+                  </select>
+
+
+                </div>
+              
+              </td>
+              </tr><br>
+
+
+              <tr>
+                <td><label for="condition">Condition</label></td>
+
+
+                <td><div class="form-group">
+                    <input class="form-check-input" type="checkbox" id="new" name="newCondition" value="new" [(ngModel)]="searchQuery.newCondition" style="margin-right: 2%;">
+                    <label class="form-check-label" for="new" style="margin-right: 2%;">New</label>
+
+
+                    <input class="form-check-input" type="checkbox" id="used" name="used_condition" value="used" [(ngModel)]="searchQuery.usedCondition" style="margin-right: 2%;">
+                    <label class="form-check-label" for="used" style="margin-right: 2%;">Used</label>
+
+
+                    <input class="form-check-input" type="checkbox" id="unspecified" name="unspecified_condition" value="unspecified" [(ngModel)]="searchQuery.unspecifiedCondition" style="margin-right: 2%;">
+                    <label class="form-check-label" for="unspecified" style="margin-right: 2%;">Unspecified</label>
+
+                </div>
+              
+              </td>
+              </tr>
+              <br>
+              
+              <tr>
+                <td><label for="shippingOptions">Shipping Options</label></td>
+
+                <td><div class="form-group">
+
+
+                    <input class="form-check-input" type="checkbox" id="localPickup" name="shippingOptions" value="Local Pickup" [(ngModel)]="searchQuery.shippingLocal" style="margin-right: 2%;">
+                    <label class="form-check-label" for="localPickup" style="margin-right: 2%;">Local Pickup</label>
+
+                    <input class="form-check-input" type="checkbox" id="freeShipping" name="shippingOptions" value="Free Shipping" [(ngModel)]="searchQuery.shippingFree" style="margin-right: 2%;">
+                    <label class="form-check-label" for="freeShipping" style="margin-right: 2%;">Free Shipping</label>
+
+
+                </div>
+              
+              </td>
+              </tr>
+              <br>
+
+              <tr>
+
+                <td><label for="distance">Distance (Miles)</label></td>
+                <td><div class="form-group">
+
+                  <input class="form-control" type="number" id="distance" name="distance" [(ngModel)]="searchQuery.distance" style="width: 25%;">
+                </div>
+
+              
+              </td>
+              </tr><br>
+
+              <tr>
+                <td><label>From<span style="color: red;font-size: 1.2em;">*</span></label></td>
+                <td>
+                  <div class="form-group">
+
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" id="currentLocation" name="locationChoice" value="current" [(ngModel)]="searchQuery.locationChoice" (click)="getCurrentLocation()" required>
+                    <label class="form-check-label" for="currentLocation">'Current Location'</label>
+                  </div>
+
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" id="customLocation" name="locationChoice" value="custom" [(ngModel)]="searchQuery.locationChoice" required>
+                    <label class="form-check-label" for="customLocation">Other. Please specify zip<br> code:</label>
+                  </div>
+
+                  <input type="text" class="form-control" id="customLocationInput" name="customLocation" [(ngModel)]="searchQuery.customLocation" (input)="updateInputValidity()" (input)="getZipCodeSuggestions()" list="zipSuggestions" [disabled]="searchQuery.locationChoice !== 'custom'" required="Please enter a zip code" style="width: 60%;">
+                  <datalist id="zipSuggestions"></datalist>
+                </div>
+              </td>
+
+              </tr><br>
+
+          </table>
+
+            <button mat-button type="submit" class="btn" [disabled]="!isInputValid" style="margin-right:5% ;background-color: white;"><mat-icon>search</mat-icon>Search</button>
+            <button mat-button type="button" class="btn" (click)="clearForm()" style="margin-right:5%;background-color: white;" ><mat-icon>clear_all</mat-icon>Clear</button>
+
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+
+    <br>
+    
+    <button type="button" class="btn btn-primary" [disabled]="!isProductDetailsAvailable" (click)="getSingleItem(currItemId)" *ngIf="showBothTab && !this.noResults"> Details ></button>
+
+
+    <div *ngIf="noResults" style="background-color: rgb(226, 226, 167);">
+      No Results!
+    </div>
+
+    <div class="container">
+      <div class="d-flex justify-content-center mt-3">
+
+        <ul class="nav nav-tabs" id="myTab" role="tablist" *ngIf="showBothTab">
+
+          <li class="nav-item" role="presentation" [class.active]="showResultsInfoTab">
+              <a class="nav-link" id="results-tab" data-bs-toggle="tab"  role="tab" aria-controls="results" aria-selected="true" (click)="showResults()" >Results</a>
+          </li>
+
+          <li class="nav-item" role="presentation" [class.active]="showWishlistInfoTab">
+              <a class="nav-link" id="wishlist-tab" data-bs-toggle="tab"  role="tab" aria-controls="wishlist" aria-selected="false" (click)="showWishlist()">Wishlist</a>
+          </li>
+
+      </ul>
+
+    </div>
+
+
+    <div class="tab-pane fade show active" id="wishlist" role="tabpanel" aria-labelledby="wishlist-tab" *ngIf="showWishlistInfoTab" >
+    
+      <div class="wishlist-content" >
+
+        <table class="table table-dark table-striped">
+          <thead>
+
+              <tr>
+
+                  <th>#</th>
+                  <th>Image</th>
+                  <th>Title</th>
+                  <th>Price</th>
+
+                  <th>Shipping Option</th>
+                  <th>Wishlist</th>
+
+              </tr>
+
+          </thead>
+
+
+          <tbody>
+
+              <ng-container *ngIf="wishlistAllItems">
+
+                  <tr *ngFor="let wishlistItem of wishlistAllItems; let i = index" >
+                    <td>{{i + 1 }}</td>
+                      <td >
+
+                        <img src="{{wishlistItem.galleryURL}}" alt="Item Image" width="100" height="100">
+                        <td class="dots" (click)="getSingleItem(wishlistItem.itemId)" style="color:rgb(132, 175, 255);">
+                          {{ wishlistItem.title }}
+                        </td>
+                        <td>
+                            ${{ wishlistItem.currentPrice }} </td>
+                            <td >
+
+                              {{ wishlistItem.shippingServiceCost }} </td>
+                              <td>
+
+                                <button mat-button style="background-color: #fff" color="warn" (click)="wishlistToggle(wishlistItem.itemId, wishlistItem.title, wishlistItem.galleryURL,wishlistItem.currentPrice, wishlistItem.shippingServiceCost)" [hidden]="!wishlistStatus.get(wishlistItem.itemId[0])">
+                                  <mat-icon>add_shopping_cart</mat-icon>
+                                </button>
+
+                                <button mat-button style="background-color: #fff" color="warn" (click)="wishlistToggle(wishlistItem.itemId, wishlistItem.title, wishlistItem.galleryURL,wishlistItem.currentPrice, wishlistItem.shippingServiceCost)" [hidden]="wishlistStatus.get(wishlistItem.itemId[0])">
+                                  <mat-icon>remove_shopping_cart</mat-icon>
+                                </button>
+
+                              </td>      
+                  </tr>
+
+              </ng-container>
+
+          </tbody>
+
+      </table>
+      
+      </div>
+    </div>
+
+      <table *ngIf="submitButtonPressed && !showWishlistInfoTab" class="table table-dark table-striped">
+
+        <thead class="thead-dark">
+          <tr>
+
+            <th>#</th>
+            <th>Image</th>
+            <th>Title</th>
+            <th>Price</th>
+            <th>Shipping</th>
+            <th>Zip</th>
+            <th>Wishlist</th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          <ng-container *ngIf="isDataLoaded && items">
+
+            <tr *ngFor="let item of paginatedItems; let i = index" [class.selectRowHighlight]="item.itemId === currItemId">
+              
+              <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
+
+              <td>
+
+                <a href="{{item.galleryURL}}" target="_blank">
+                  <img src="{{item.galleryURL}}" alt="Item Image" width="100" height="100">
+                </a>
+
+              </td>
+
+              <td class="dots" (click)="getSingleItem(item.itemId)" style="color:rgb(132, 175, 255);">
+                {{ item.title }}
+              </td>
+
+              <td>${{ item.sellingStatus[0].currentPrice[0]['__value__']}}</td>
+
+              <td>{{ shippingValues[i] }}</td>
+
+              <td>{{ item.postalCode }}</td>
+
+              <td>
+
+                <button style="background-color: #fff" mat-button (click)="wishlistToggle(item.itemId, item.title, item.galleryURL,item.sellingStatus[0].currentPrice[0]['__value__'], item.shippingInfo[0].shippingServiceCost[0]['__value__'])" [hidden]="wishlistStatus.get(item.itemId[0])">
+                  <mat-icon>add_shopping_cart</mat-icon>
+                </button>
+
+                <button style="background-color: #fff" mat-button  (click)="wishlistToggle(item.itemId, item.title, item.galleryURL,item.sellingStatus[0].currentPrice[0]['__value__'], item.shippingInfo[0].shippingServiceCost[0]['__value__'])" [hidden]="!wishlistStatus.get(item.itemId[0])">
+                  <mat-icon>remove_shopping_cart</mat-icon>
+                </button>
+
+              </td>
+
+            </tr>
+
+          </ng-container>
+
+        </tbody>
+
+      </table><br>
+
+
+
+      <nav *ngIf="items.length > itemsPerPage && submitButtonPressed && showResultsInfoTab">
+        <ul class="pagination justify-content-center">
+
+          <li class="page-item" [class.disabled]="currentPage == 1">
+            <a class="page-link" href="#" (click)="changePage(1)"><<</a>
+          </li>
+
+          <li class="page-item" [class.disabled]="currentPage == 1">
+            <a class="page-link" href="#" (click)="changePage(currentPage - 1)">Previous</a>
+          </li>
+
+          <li class="page-item" *ngFor="let page of pages" [class.active]="currentPage == page">
+            <a class="page-link" href="#" (click)="changePage(page)">{{ page }}</a>
+          </li>
+
+          <li class="page-item" [class.disabled]="currentPage == totalPages">
+            <a class="page-link" href="#" (click)="changePage(currentPage + 1)">Next</a>
+          </li>
+
+          <li class="page-item" [class.disabled]="currentPage == totalPages">
+            <a class="page-link" href="#" (click)="changePage(totalPages)">>></a>
+          </li>
+
+        </ul>
+
+      </nav>
+      
+    </div>
+
+
+
+    <div class="container" *ngIf="showProductInfoTab && !this.noResults">
+      <div class="row">
+        
+          <div class="">
+              <div class="product-detail text-center">
+
+                  <h2>{{singleItemsResponse.Title}}</h2><br>
+
+
+<button (click)="backButton()">List</button>
+
+                  <button class ="btn btn-light">
+                    <a [attr.href]="'https://www.facebook.com/sharer/sharer.php?u=' + singleItemsResponse.ViewItemURLForNaturalSearch" target="_blank" >Facebook</a>
+                  </button>
+
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+
+                      <li class="nav-item" role="presentation">
+                          <a class="nav-link" [class.active]="getProductInfo" data-bs-toggle="tab"  role="tab" (click)="toggleTab('getProductInfo')">Product</a>
+                      </li>
+
+                      <li class="nav-item" role="presentation">
+                        <a class="nav-link" [class.active]="getPhotosInfo" data-bs-toggle="tab"  role="tab" (click)="getGoogleImages(singleItemsResponse.Title)">Photos</a>
+                    </li>
+
+                      <li class="nav-item" role="presentation">
+                          <a class="nav-link" [class.active]="getShippingInfo" data-bs-toggle="tab"  role="tab" (click)="toggleTab('getShippingInfo')">Shipping</a>
+                      </li>
+
+                      <li class="nav-item" role="presentation">
+                          <a class="nav-link" [class.active]="getSellerInfo" data-bs-toggle="tab"  role="tab" (click)="toggleTab('getSellerInfo')">Seller</a>
+                      </li>
+
+                      <li class="nav-item" role="presentation">
+                          <a class="nav-link" [class.active]="getSimilarProductsInfo" data-bs-toggle="tab"  role="tab"  (click)="getSimilarProducts(currItem.itemId)">Similar Products</a>
+                      </li>
+
+                  </ul>
+
+                
+
+
+                  <table class="table table-dark table-striped" style="text-align: left;" *ngIf="getProductInfo">
+
+                    <tbody>
+
+                      <tr>
+                        <td>Product Images</td>
+                        <td>View Product Images Here</td>
+                      </tr>
+
+                      <tr>
+                        <td>Price</td>
+                        <td>${{singleItemsResponse.CurrentPrice.Value}}</td>
+                      </tr>
+
+                      <tr>
+                        <td>Location</td>
+                        <td>{{singleItemsResponse.Location}}</td>
+                      </tr>
+
+                      <tr>
+                        <td>Return Policy</td>
+                        <td>{{
+                          singleItemsResponse.ReturnPolicy.ReturnsAccepted == 'Returns Accepted'
+                            ? singleItemsResponse.ReturnPolicy.ReturnsAccepted+ ' Within '+singleItemsResponse.ReturnPolicy.ReturnsWithin
+                            : singleItemsResponse.ReturnPolicy.ReturnsAccepted
+                        }}</td>
+                      </tr>
+
+                      <ng-container *ngIf="singleItemsResponse.ItemSpecifics && singleItemsResponse.ItemSpecifics.NameValueList">
+                        
+                        <tr *ngFor="let spec of singleItemsResponse.ItemSpecifics.NameValueList">
+                          <td>{{ spec.Name }}</td>
+                          <td>{{ spec.Value.join(', ') }}</td>
+                        </tr>
+
+                      </ng-container>
+
+                    </tbody>
+                  </table>
+
+
+                  <div *ngIf="getPhotosInfo">
+                    <div class="d-flex flex-wrap">
+
+                      <ng-container *ngFor="let googleResultItem of googleResultItems; let i = index">
+
+                        <div class="p-2" style="flex: 0 0 33.33%; max-width: 33.33%;">
+
+                          <a href="{{googleResultItem.link}}" target="_blank">
+                            <img src="{{googleResultItem.link}}" alt="Item Image {{i}}" class="img-thumbnail add-border">
+                          </a>
+
+                        </div>
+
+                      </ng-container>
+
+                    </div>
+                  </div>
+
+
+                  <div class="d-flex justify-content-start align-items-center mb-2" *ngIf="getSimilarProductsInfo">
+
+                    <label for="sortCategory" class="mr-2">
+                    </label>
+
+                    <select id="sortCategory" [(ngModel)]="selectedSortCategory" class="mr-3">
+                      <option value="Default">Default</option>
+                      <option value="ProductName">Product Name</option>
+                      <option value="DaysLeft">Days Left</option>
+                      <option value="Price">Price</option>
+                      <option value="ShippingCost">Shipping Cost</option>
+                    </select>
+
+                    <label for="sortOrder" class="mr-2" *ngIf="getSimilarProductsInfo">                     
+                    </label>
+
+                    <select id="sortOrder" [(ngModel)]="selectedSortOrder" (change)="sortSimilarItems()" [disabled]="selectedSortCategory === 'Default'">
+                      <option value="Ascending">Ascending</option>
+                      <option value="Descending" style="padding-left: 5%;">Descending</option>
+                    </select>
+
+                  </div>
+
+                  <table class="table table-dark table-striped" style="text-align: left;" *ngIf="getSimilarProductsInfo">
+
+                    <tbody>
+                      <ng-container *ngIf="similarProductsResponse">
+
+                        <tr style="margin-bottom: 10px;" *ngFor="let similarItem of similarProductsResponse.getSimilarItemsResponse.itemRecommendations.item.slice(0, showMoreItems ? similarProductsResponse.getSimilarItemsResponse.itemRecommendations.item.length : 5);">
+                          
+                          <td>
+                            <img src="{{similarItem.imageURL}}" alt="Item Image" width="150" height="150" style="margin-left: 5%;">
+                          </td>
+
+                          <td>
+                            {{ similarItem.title }}
+                            <br>
+                            Price: {{similarItem.buyItNowPrice.__value__}}
+                            <br>
+                            Shipping Cost: {{similarItem.shippingCost.__value__}}
+                            <br>
+                            Days Left: {{getDaysLeft(similarItem.timeLeft)}}
+                          </td>
+
+                        </tr>
+
+                      </ng-container>
+                    </tbody>
+
+                  </table>
+
+
+                  <div *ngIf="getSimilarProductsInfo">
+                    <button *ngIf="similarProductsResponse?.getSimilarItemsResponse.itemRecommendations.item.length > 5" class="btn btn-primary" (click)="toggleShowMoreLess()">{{ getShowMoreLessButtonText() }}</button>
+                  </div>
+
+
+                  <table class="table table-dark table-striped" style="text-align: left;" *ngIf="getSellerInfo">
+                    
+                    <tbody>
+
+                      <tr>
+                        <td colspan="2" class="text-center font-weight-bold text-uppercase">{{singleItemsResponse.Storefront.StoreName}}</td>
+                      </tr>
+
+                      <tr>
+                        <td>Feedback Score</td>
+                        <td>{{singleItemsResponse.Seller.FeedbackScore}}</td>
+                      </tr>
+
+                      <tr>
+                        <td>Popularity</td>
+                        <td >
+                          <div style="width: 40px; height: 40px;">
+                          <round-progress
+                            [max]="100"
+                            [current]="singleItemsResponse.Seller.PositiveFeedbackPercent"
+                            [radius]="30"
+                            [stroke]="1"
+                            [color]="'#4caf50'"
+                            [background]="'#e0e0e0'"
+                            [semicircle]="false"
+                            [rounded]="true"
+                            [responsive]="true"
+                            [duration]="800"
+                            [animation]="'easeInOutQuart'"
+                          >
+                          </round-progress>
+                          <span class="mx-2">{{singleItemsResponse.Seller.PositiveFeedbackPercent}}</span></div>
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td>Feedback Rating Star</td>
+                        <td *ngIf="singleItemsResponse.Seller.FeedbackRatingStar === 'Purple'"><mat-icon style="color: purple;">star</mat-icon></td>
+                        <td *ngIf="singleItemsResponse.Seller.FeedbackRatingStar === 'Yellow'"><mat-icon style="color: Yellow;">star</mat-icon></td>
+                        <td *ngIf="singleItemsResponse.Seller.FeedbackRatingStar === 'Blue'"><mat-icon style="color: Blue;">star</mat-icon></td>
+                        <td *ngIf="singleItemsResponse.Seller.FeedbackRatingStar === 'Turquoise'"><mat-icon style="color: Turquoise;">star</mat-icon></td>
+                        <td *ngIf="singleItemsResponse.Seller.FeedbackRatingStar === 'Red'"><mat-icon style="color: Red;">star</mat-icon></td>
+                        <td *ngIf="singleItemsResponse.Seller.FeedbackRatingStar === 'Green'"><mat-icon style="color: Green;">star</mat-icon></td>
+                        <td *ngIf="singleItemsResponse.Seller.FeedbackRatingStar === 'YellowShooting'"><mat-icon style="color: yellow;">stars</mat-icon></td>
+                        <td *ngIf="singleItemsResponse.Seller.FeedbackRatingStar === 'TurquoiseShooting'"><mat-icon style="color: turquoise;">stars</mat-icon></td>
+                        <td *ngIf="singleItemsResponse.Seller.FeedbackRatingStar === 'PurpleShooting'"><mat-icon style="color: purple;">stars</mat-icon></td>
+                        <td *ngIf="singleItemsResponse.Seller.FeedbackRatingStar === 'RedShooting'"><mat-icon style="color: red;">stars</mat-icon></td>
+                        <td *ngIf="singleItemsResponse.Seller.FeedbackRatingStar === 'GreenShooting'"><mat-icon style="color: green;">stars</mat-icon></td>
+                        <td *ngIf="singleItemsResponse.Seller.FeedbackRatingStar === 'SilverShooting'"><mat-icon style="color: silver;">stars</mat-icon></td>
+                      </tr>
+
+                      <tr>
+                        <td>Top Rated</td>
+                        <td *ngIf="singleItemsResponse.Seller.TopRatedSeller"><mat-icon style="color: green;">done</mat-icon></td>
+                        <td *ngIf="!singleItemsResponse.Seller.TopRatedSeller"><mat-icon style="color: red;">close</mat-icon></td>
+                      </tr>
+
+                      <tr>
+                        <td>Store Name</td>
+                        <td>{{singleItemsResponse.Storefront.StoreName}}</td>
+                      </tr>
+
+                      <tr>
+                        <td>Buy Product At</td>
+                        <td><a href="{{singleItemsResponse.Storefront.StoreURL}}">Store</a></td>
+                      </tr>
+
+                    </tbody>
+
+                  </table>
+
+
+                  <table class="table table-dark" style="text-align: left;" *ngIf="getShippingInfo">
+                    
+                    <tbody>
+
+                      <tr>
+                        <td>Shipping Cost</td>
+                        <td>{{currShippingPrice}}</td>
+                      </tr>
+
+                      <tr>
+                        <td>Shipping Locations</td>
+                        <td>{{currItem.shippingInfo[0].shipToLocations}}</td>
+                      </tr>
+
+                      <tr>
+                        <td>Handling Time</td>
+                        <td>{{
+                          currItem.shippingInfo[0].handlingTime > 1
+                            ? currItem.shippingInfo[0].handlingTime + ' Days'
+                            : currItem.shippingInfo[0].handlingTime + ' Day'
+                        }}</td>
+                      </tr>
+
+                      <tr>
+                        <td>Expedited Shipping</td>
+                        <td *ngIf="currItem.shippingInfo[0].expeditedShipping"><mat-icon style="color: green;">done</mat-icon></td>
+                        <td *ngIf="!currItem.shippingInfo[0].expeditedShipping"><mat-icon style="color: red;">close</mat-icon></td>
+                      </tr>
+
+                      <tr>
+                        <td>One Day Shipping</td>
+                        <td *ngIf="currItem.shippingInfo[0].oneDayShippingAvailable"><mat-icon style="color: green;">done</mat-icon></td>
+                        <td *ngIf="!currItem.shippingInfo[0].oneDayShippingAvailable"><mat-icon style="color: red;">close</mat-icon></td>
+                      </tr>
+
+                      <tr>
+                        <td>Returns Accepted</td>
+                        <td *ngIf="currItem.returnsAccepted"><mat-icon style="color: green;">done</mat-icon></td>
+                        <td *ngIf="!currItem.returnsAccepted"><mat-icon style="color: red;">close</mat-icon></td>
+                      </tr>
+
+                    </tbody>
+
+                  </table>
+
+              </div>
+          </div>
+      </div>
+    </div>
+  </body>
+ 
+</html>

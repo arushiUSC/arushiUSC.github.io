@@ -1,0 +1,8 @@
+runtime: nodejs16
+
+handlers:
+  - url: /
+    static_files: dist/webtech3/index.html
+    upload: dist/webtech3/index.html
+  - url: /
+    static_dir: dist/webtech3
